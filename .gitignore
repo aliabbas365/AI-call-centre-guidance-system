@@ -91,3 +91,4 @@ cython_debug/
 
 # Redis dump
 dump.rdb
+*.wav
