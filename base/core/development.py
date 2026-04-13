@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-&r((#t-_n#5_et_zbm4
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '34.165.143.38',"*"]
 
 # =============================================================================
 # CORS SETTINGS - Permissive for Development

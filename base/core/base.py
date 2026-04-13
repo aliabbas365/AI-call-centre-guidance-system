@@ -69,6 +69,13 @@ LOCAL_APPS = [
     'base',  # Required for management commands
     'apps.authentication',  # Authentication system
     'apps.email_service',  # Email service
+
+
+    'apps.calls',
+
+    'apps.analysis',
+
+    'apps.knowledge_base',
 ]
 
 INSTALLED_APPS = UNFOLD_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -188,10 +195,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -199,7 +206,6 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',
         'user': '1000/hour',
-        # CRUD-specific throttle rates
         'crud_read': '100/minute',
         'crud_write': '50/minute',
         'crud_create': '30/minute',

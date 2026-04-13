@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Center AI Assistant</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: #111827;
+            color: white;
+            padding: 24px 18px;
+            overflow-y: auto;
+        }
+
+        .sidebar-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .sidebar h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .sidebar button {
+            background: #2563eb;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .history-card:hover {
+            background: #243042;
+        }
+
+        .history-card.active {
+            border-color: #60a5fa;
+            background: #1e3a5f;
+        }
+
+        .history-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .history-meta {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .main {
+            flex: 1;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .status-pill {
+            background: #dcfce7;
+            color: #166534;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        select,
+        textarea {
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 110px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .secondary-btn {
+            background: #0f766e;
+        }
+
+        .secondary-btn:hover {
+            background: #115e59;
+        }
+
+        .warning-btn {
+            background: #92400e;
+        }
+
+        .warning-btn:hover {
+            background: #78350f;
+        }
+
+        .status-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .status-box.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #b91c1c;
+        }
+
+        .status-box.success {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .stat-title {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .chat-box {
+            max-height: 560px;
+            overflow-y: auto;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .message-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .message-row.agent {
+            justify-content: flex-start;
+        }
+
+        .message-row.caller {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .message-row.agent .message-bubble {
+            background: #f3f4f6;
+            color: #111827;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-row.caller .message-bubble {
+            background: #dcfce7;
+            color: #166534;
+            border-bottom-right-radius: 4px;
+      }
+
+        .message-label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            opacity: 0.8;
+        }
+
+        .guidance-box,
+        .summary-box {
+            white-space: pre-wrap;
+            line-height: 1.7;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .badge-neutral {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .badge-positive {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-negative {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .meta-line {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 1000px) {
+            .sidebar { display: none; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <h2>Call History</h2>
+                <button onclick="loadCallHistory()">Refresh</button>
+            </div>
+
+            <div id="historyList" class="history-list">
+                <div class="history-card">
+                    <div class="history-title">Loading calls...</div>
+                    <div class="history-meta">Please wait</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="header">
+                <h1>Call Center Assistant Dashboard</h1>
+                <div class="status-pill">Backend Connected</div>
+            </div>
+
+            <div class="card">
+                <div class="control-row">
+                    <input type="text" id="callerName" placeholder="Caller name" value="Ali">
+                    <input type="text" id="callerPhone" placeholder="Caller phone" value="03001234567">
+                    <button onclick="createCall()">Create Call</button>
+                </div>
+
+                <div class="control-row">
+                    <input type="number" id="callId" placeholder="Call ID">
+                    <button class="secondary-btn" onclick="fetchAssistantData()">Load Existing Call</button>
+                </div>
+
+                <div id="statusBox" class="status-box">No active call selected.</div>
+            </div>
+
+            <div class="card">
+                <div class="control-row">
+                    <input type="file" id="audioFile" accept=".wav,.mp3,.m4a,.mp4,.mpeg">
+                    <button onclick="uploadAudio()">Upload Audio + Process</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Live Call Streaming</h2>
+                <div class="control-row">
+                    <button onclick="startLiveStreaming()">Start Live Stream</button>
+                    <button class="warning-btn" onclick="stopLiveStreaming()">Stop Live Stream</button>
+                </div>
+                <div class="control-row">
+                    <button onclick="setSpeaker('caller')">Caller</button>
+                    <button onclick="setSpeaker('agent')">Agent</button>
+                </div>
+                <div class="meta-line">This records microphone audio in small chunks and sends them to the backend continuously.</div>
+            </div>
+
+            <div class="card">
+                <h2>Manual Transcript Input</h2>
+                <div class="control-row">
+                    <select id="speakerType">
+                        <option value="caller">Caller</option>
+                        <option value="agent">Agent</option>
+                    </select>
+                    <button class="secondary-btn" onclick="addManualTranscript()">Add Message</button>
+                    <button class="warning-btn" onclick="runAnalysisNow()">Analyze Now</button>
+                </div>
+                <textarea id="manualTranscript" placeholder="Type or paste a transcript message here..."></textarea>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-title">Call ID</div>
+                    <div class="stat-value" id="statCallId">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Intent</div>
+                    <div class="stat-value" id="intent">-</div>
+                    <div class="meta-line">Category</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Sentiment</div>
+                    <div class="stat-value" id="sentiment">-</div>
+                    <div class="meta-line">Conversation tone</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Confidence</div>
+                    <div class="stat-value" id="confidence">-</div>
+                    <div class="meta-line">Model score</div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-title">Caller</div>
+                    <div class="stat-value" id="callerInfo">-</div>
+                    <div class="meta-line">Current call</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Status</div>
+                    <div class="stat-value" id="callStatus">-</div>
+                    <div class="meta-line">Pipeline state</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Intent Badge</div>
+                    <div id="intentBadge" class="badge badge-neutral">No intent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Sentiment Badge</div>
+                    <div id="sentimentBadge" class="badge badge-neutral">No sentiment</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div>
+                    <div class="panel">
+                        <h2>Transcript Chat View</h2>
+                        <div id="chatTranscript" class="chat-box">
+                            <div class="message-row caller">
+                                <div class="message-bubble">No transcript loaded.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="panel">
+                        <h2>AI Guidance</h2>
+                        <div id="guidance" class="guidance-box">No guidance available.</div>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Call Summary</h2>
+                        <div id="summary" class="summary-box">No summary available.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    const API_BASE = "http://34.165.242.223:8081/api";
+    let currentCallId = null;
+
+    let liveStream = null;
+    let audioContext = null;
+    let mediaStreamSource = null;
+    let workletNode = null;
+    let isStreaming = false;
+    let liveCallId = null;
+    let liveSessionKey = null;
+    let liveSequenceNumber = 1;
+    let pcmSendBuffer = [];
+    let pcmFlushInterval = null;
+    let mediaRecorder = null;
+    let uploadInterval = null;
+    let pendingChunks = [];
+
+    function downsampleBuffer(buffer, inputSampleRate, outputSampleRate) {
+        if (outputSampleRate === inputSampleRate) {
+            return buffer;
+        }
+
+        const sampleRateRatio = inputSampleRate / outputSampleRate;
+        const newLength = Math.round(buffer.length / sampleRateRatio);
+        const result = new Float32Array(newLength);
+
+        let offsetResult = 0;
+        let offsetBuffer = 0;
+
+        while (offsetResult < result.length) {
+            const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+            let accum = 0;
+            let count = 0;
+
+            for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+                accum += buffer[i];
+                count++;
+            }
+
+            result[offsetResult] = count > 0 ? accum / count : 0;
+            offsetResult++;
+            offsetBuffer = nextOffsetBuffer;
+        }
+
+        return result;
+    }
+
+    function floatTo16BitPCM(float32Array) {
+        const buffer = new ArrayBuffer(float32Array.length * 2);
+        const view = new DataView(buffer);
+
+        let offset = 0;
+        for (let i = 0; i < float32Array.length; i++, offset += 2) {
+            let s = Math.max(-1, Math.min(1, float32Array[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+
+        return new Uint8Array(buffer);
+    }
+
+    function uint8ToBase64(uint8Array) {
+        let binary = "";
+        const chunkSize = 0x8000;
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+            const sub = uint8Array.subarray(i, i + chunkSize);
+            binary += String.fromCharCode.apply(null, sub);
+        }
+        return btoa(binary);
+    }
+
+    async function flushPCMBuffer() {
+        if (!pcmSendBuffer.length) return;
+
+        const totalLength = pcmSendBuffer.reduce((sum, arr) => sum + arr.length, 0);
+        const merged = new Uint8Array(totalLength);
+
+        let offset = 0;
+        for (const arr of pcmSendBuffer) {
+            merged.set(arr, offset);
+            offset += arr.length;
+        }
+
+        pcmSendBuffer = [];
+
+        const pcmBase64 = uint8ToBase64(merged);
+
+        console.log("PCM DEBUG liveCallId:", liveCallId);
+        console.log("PCM DEBUG liveSessionKey:", liveSessionKey);
+        console.log("PCM DEBUG sequence:", liveSequenceNumber);
+        console.log("PCM DEBUG pcmSendBuffer length:", pcmSendBuffer.length);
+        console.log("PCM DEBUG merged bytes:", totalLength);
+        function getCurrentSpeaker() {
+               // simple toggle logic OR default
+             return window.currentSpeaker || "caller";
+            }
+        const response = await fetch(`${API_BASE}/calls/${liveCallId}/live/pcm-chunk/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                session_key: liveSessionKey,
+                sequence_number: liveSequenceNumber++,
+                pcm_data: pcmBase64,
+                speaker: getCurrentSpeaker()
+            })
+        });
+
+        const data = await response.json();
+
+        console.log("PCM LIVE RESPONSE:", data);
+
+        if (!response.ok) {
+            throw new Error(data.error || JSON.stringify(data));
+        }
+
+        updateAnalysisUI(data, liveCallId);
+        document.getElementById("callerInfo").innerText =
+            document.getElementById("callerName").value.trim() || `Call #${liveCallId}`;
+    }
+
+    function setStatus(message, type = "info") {
+        const box = document.getElementById("statusBox");
+        box.innerText = message;
+        box.className = "status-box";
+        if (type === "error") box.classList.add("error");
+        if (type === "success") box.classList.add("success");
+    }
+
+    function setButtonsDisabled(disabled) {
+        document.querySelectorAll("button").forEach((btn) => {
+            btn.disabled = disabled;
+            btn.style.opacity = disabled ? "0.7" : "1";
+            btn.style.cursor = disabled ? "not-allowed" : "pointer";
+        });
+    }
+
+    function setSpeaker(type) {
+        window.currentSpeaker = type;
+        console.log("Speaker set to:", type);
+    }
+
+    function getIntentBadgeClass(intent) {
+        if (!intent || intent === "-") return "badge-neutral";
+        if (intent === "insurance_inquiry") return "badge-blue";
+        if (intent === "billing") return "badge-warning";
+        if (intent === "complaint") return "badge-negative";
+        if (intent === "technical_issue") return "badge-warning";
+        return "badge-neutral";
+    }
+
+    function getSentimentBadgeClass(sentiment) {
+        if (!sentiment || sentiment === "-") return "badge-neutral";
+        if (sentiment === "positive") return "badge-positive";
+        if (sentiment === "negative" || sentiment === "angry" || sentiment === "frustrated") return "badge-negative";
+        if (sentiment === "neutral") return "badge-blue";
+        return "badge-neutral";
+    }
+
+    function applyBadge(elementId, value, badgeClass) {
+        const el = document.getElementById(elementId);
+        el.innerText = value || "-";
+        el.className = `badge ${badgeClass}`;
+    }
+
+    function clearAnalysisUI() {
+        document.getElementById("statCallId").innerText = "-";
+        document.getElementById("intent").innerText = "-";
+        document.getElementById("sentiment").innerText = "-";
+        document.getElementById("confidence").innerText = "-";
+        document.getElementById("callerInfo").innerText = "-";
+        document.getElementById("callStatus").innerText = "-";
+        document.getElementById("guidance").innerText = "No guidance available.";
+        document.getElementById("summary").innerText = "No summary available.";
+        document.getElementById("chatTranscript").innerHTML = `
+            <div class="message-row caller">
+                <div class="message-bubble">No transcript loaded.</div>
+            </div>
+        `;
+        applyBadge("intentBadge", "No intent", "badge-neutral");
+        applyBadge("sentimentBadge", "No sentiment", "badge-neutral");
+    }
+
+    function renderTranscriptSegments(segments) {
+        const container = document.getElementById("chatTranscript");
+
+        if (!segments || segments.length === 0) {
+            container.innerHTML = "<p>No transcript yet</p>";
+            return;
+        }
+
+        container.innerHTML = segments.map(seg => {
+            const sideClass = seg.speaker === "agent" ? "agent" : "caller";
+            const label = seg.speaker === "agent" ? "Agent" : "Caller";
+
+            return `
+                <div class="message-row ${sideClass}">
+                    <div class="message-bubble">
+                        <div class="message-label">${label}</div>
+                        ${seg.text}
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function renderChatTranscript(fullTranscript) {
+        const container = document.getElementById("chatTranscript");
+
+        if (!fullTranscript || !fullTranscript.trim()) {
+            container.innerHTML = `
+                <div class="message-row caller">
+                    <div class="message-bubble">No transcript loaded.</div>
+                </div>
+            `;
+            return;
+        }
+
+        const lines = fullTranscript
+            .split(/(?<=[.!?])\s+/)
+            .map(line => line.trim())
+            .filter(Boolean);
+
+        container.innerHTML = lines.map((line) => `
+            <div class="message-row caller">
+                <div class="message-bubble">
+                    <div class="message-label">Transcript</div>
+                    ${line}
+                </div>
+            </div>
+        `).join("");
+
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function updateAnalysisUI(data, callId) {
+    currentCallId = callId;
+    document.getElementById("callId").value = callId || "";
+    document.getElementById("statCallId").innerText = callId || "-";
+
+    console.log("updateAnalysisUI received:", data);
+
+    if (Array.isArray(data.transcript_segments) && data.transcript_segments.length > 0) {
+        renderTranscriptSegments(data.transcript_segments);
+    } else {
+        renderChatTranscript(data.transcript || "");
+    }
+
+    if (data.analysis) {
+        const intent = data.analysis.intent || "-";
+        const sentiment = data.analysis.sentiment || "-";
+        const confidence = data.analysis.confidence_score ?? "-";
+
+        document.getElementById("intent").innerText = intent;
+        document.getElementById("sentiment").innerText = sentiment;
+        document.getElementById("confidence").innerText = confidence;
+        document.getElementById("guidance").innerText = data.analysis.guidance_text || "No guidance available.";
+        document.getElementById("summary").innerText = data.analysis.summary || "No summary available.";
+
+        applyBadge("intentBadge", intent, getIntentBadgeClass(intent));
+        applyBadge("sentimentBadge", sentiment, getSentimentBadgeClass(sentiment));
+    } else {
+        document.getElementById("intent").innerText = "-";
+        document.getElementById("sentiment").innerText = "-";
+        document.getElementById("confidence").innerText = "-";
+        document.getElementById("guidance").innerText = "No guidance available.";
+        document.getElementById("summary").innerText = "No summary available.";
+
+        applyBadge("intentBadge", "No intent", "badge-neutral");
+        applyBadge("sentimentBadge", "No sentiment", "badge-neutral");
+    }
+
+    document.getElementById("callStatus").innerText = data.call_status || "-";
+}
+
+    function renderHistory(calls) {
+        const list = document.getElementById("historyList");
+
+        if (!Array.isArray(calls) || calls.length === 0) {
+            list.innerHTML = `
+                <div class="history-card">
+                    <div class="history-title">No calls found</div>
+                    <div class="history-meta">Create a new call to get started</div>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = calls.map(call => `
+            <div class="history-card ${String(currentCallId) === String(call.id) ? 'active' : ''}">
+                <div onclick="selectCall(${call.id}, '${(call.caller_name || '').replace(/'/g, "\\'")}', '${call.status || ''}')">
+                    <div class="history-title">Call #${call.id}</div>
+                    <div class="history-meta">
+                        Caller: ${call.caller_name || 'Unknown'}<br>
+                        Phone: ${call.caller_phone || '-'}<br>
+                        Status: ${call.status || '-'}
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <button onclick="deleteCall(event, ${call.id})" style="background:#b91c1c; width:100%;">Delete</button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    async function loadCallHistory() {
+        try {
+            const response = await fetch(`${API_BASE}/calls/`);
+            const data = await response.json();
+            console.log("ASSISTANT RESPONSE:", data);
+            const calls = data.results ? data.results : data;
+            renderHistory(calls);
+        } catch (error) {
+            console.error(error);
+            document.getElementById("historyList").innerHTML = `
+                <div class="history-card">
+                    <div class="history-title">Failed to load history</div>
+                    <div class="history-meta">Check backend connection</div>
+                </div>
+            `;
+        }
+    }
+
+    async function selectCall(callId, callerName = "", status = "") {
+        if (isStreaming) {
+            await stopLiveStreaming(true);
+        }
+
+        document.getElementById("callId").value = callId;
+        document.getElementById("callerName").value = callerName || "";
+        document.getElementById("callStatus").innerText = status || "-";
+        fetchAssistantData();
+    }
+
+    async function deleteCall(event, callId) {
+        event.stopPropagation();
+
+        const confirmed = confirm(`Delete Call #${callId}? This cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            if (isStreaming && String(liveCallId) === String(callId)) {
+                await stopLiveStreaming(true);
+            }
+
+            setButtonsDisabled(true);
+            setStatus(`Deleting Call ID ${callId}...`);
+
+            const response = await fetch(`${API_BASE}/calls/${callId}/`, {
+                method: "DELETE"
+            });
+
+            if (!response.ok && response.status !== 204) {
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                    const data = await response.json();
+                    errorMessage = data.error || JSON.stringify(data);
+                } catch (_) {}
+                throw new Error(errorMessage);
+            }
+
+            if (String(currentCallId) === String(callId)) {
+                currentCallId = null;
+                document.getElementById("callId").value = "";
+                clearAnalysisUI();
+            }
+
+            await loadCallHistory();
+            setStatus(`Call ${callId} deleted successfully.`, "success");
+        } catch (error) {
+            console.error(error);
+            setStatus(`Failed to delete call.\n${error.message}`, "error");
+        } finally {
+            setButtonsDisabled(false);
+        }
+    }
+
+    async function createCall() {
+        const callerName = document.getElementById("callerName").value.trim();
+        const callerPhone = document.getElementById("callerPhone").value.trim();
+
+        setStatus("Creating call...");
+
+        try {
+            setButtonsDisabled(true);
+
+            const response = await fetch(`${API_BASE}/calls/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    caller_name: callerName,
+                    caller_phone: callerPhone,
+                    status: "pending"
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || JSON.stringify(data));
+
+            clearAnalysisUI();
+            currentCallId = data.id;
+            document.getElementById("callId").value = data.id;
+            document.getElementById("statCallId").innerText = data.id;
+            document.getElementById("callerInfo").innerText = data.caller_name || "Unknown";
+            document.getElementById("callStatus").innerText = data.status || "-";
+
+            setStatus(`Call created successfully. Call ID: ${data.id}`, "success");
+            await loadCallHistory();
+        } catch (error) {
+            console.error(error);
+            setStatus(`Failed to create call.\n${error.message}`, "error");
+        } finally {
+            setButtonsDisabled(false);
+        }
+    }
+
+    async function uploadAudio() {
+        const callId = document.getElementById("callId").value;
+        const fileInput = document.getElementById("audioFile");
+        const file = fileInput.files[0];
+
+        if (!callId) {
+            setStatus("Please create or load a call first.", "error");
+            return;
+        }
+
+        if (!file) {
+            setStatus("Please choose an audio file first.", "error");
+            return;
+        }
+
+        setStatus(`Uploading "${file.name}" and processing...`);
+
+        const formData = new FormData();
+        formData.append("audio_file", file);
+
+        try {
+            setButtonsDisabled(true);
+
+            const response = await fetch(`${API_BASE}/calls/${callId}/upload-audio/`, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || JSON.stringify(data));
+
+            updateAnalysisUI(data, callId);
+            setStatus(`Audio uploaded successfully for Call ID ${callId}.`, "success");
+            await loadCallHistory();
+        } catch (error) {
+            console.error(error);
+            setStatus(`Audio upload or processing failed.\n${error.message}`, "error");
+        } finally {
+            setButtonsDisabled(false);
+        }
+    }
+
+    async function fetchAssistantData() {
+        const callId = document.getElementById("callId").value;
+
+        if (!callId) {
+            setStatus("Please enter a Call ID.", "error");
+            return;
+        }
+
+        setStatus(`Loading assistant data for Call ID ${callId}...`);
+
+        try {
+            const response = await fetch(`${API_BASE}/calls/${callId}/assistant/`);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || JSON.stringify(data));
+
+            updateAnalysisUI(data, callId);
+
+            const callerName = document.getElementById("callerName").value.trim();
+            document.getElementById("callerInfo").innerText = callerName || `Call #${callId}`;
+
+            setStatus(`Loaded assistant data for Call ID ${callId}.`, "success");
+            await loadCallHistory();
+        } catch (error) {
+            console.error(error);
+            setStatus(`Failed to load assistant data.\n${error.message}`, "error");
+        }
+    }
+
+    async function addManualTranscript() {
+        const callId = document.getElementById("callId").value;
+        const speaker = document.getElementById("speakerType").value;
+        const text = document.getElementById("manualTranscript").value.trim();
+
+        if (!callId) {
+            setStatus("Please create or load a call first.", "error");
+            return;
+        }
+
+        if (!text) {
+            setStatus("Please enter transcript text first.", "error");
+            return;
+        }
+
+        try {
+            setButtonsDisabled(true);
+            setStatus("Adding transcript message...");
+
+            const sequenceNumber = Math.floor(Date.now() / 1000);
+
+            const response = await fetch(`${API_BASE}/transcripts/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    call: Number(callId),
+                    speaker: document.getElementById("speakerType").value,
+                    text: text,
+                    sequence_number: sequenceNumber,
+                    timestamp_seconds: 0
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || JSON.stringify(data));
+
+            document.getElementById("manualTranscript").value = "";
+            setStatus("Transcript message added successfully.", "success");
+
+            await fetchAssistantData();
+        } catch (error) {
+            console.error(error);
+            setStatus(`Failed to add transcript.\n${error.message}`, "error");
+        } finally {
+            setButtonsDisabled(false);
+        }
+    }
+
+    async function runAnalysisNow() {
+        const callId = document.getElementById("callId").value;
+
+        if (!callId) {
+            setStatus("Please create or load a call first.", "error");
+            return;
+        }
+
+        try {
+            setButtonsDisabled(true);
+            setStatus("Running analysis...");
+
+            const response = await fetch(`${API_BASE}/calls/${callId}/analyze/`, {
+                method: "POST"
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || JSON.stringify(data));
+
+            setStatus("Analysis completed successfully.", "success");
+            await fetchAssistantData();
+        } catch (error) {
+            console.error(error);
+            setStatus(`Failed to run analysis.\n${error.message}`, "error");
+        } finally {
+            setButtonsDisabled(false);
+        }
+    }
+
+    function getSupportedMimeType() {
+        const candidates = [
+            "audio/webm;codecs=opus",
+            "audio/webm",
+            "audio/ogg;codecs=opus",
+            "audio/ogg"
+        ];
+
+        for (const type of candidates) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type;
+            }
+        }
+
+        return "";
+    }
+
+    async function uploadMergedLiveChunk(callId) {
+    if (!pendingChunks.length) return;
+
+    if (!liveCallId || String(callId) !== String(liveCallId)) {
+        pendingChunks = [];
+        return;
+    }
+
+    const mimeType = pendingChunks[0].type || "audio/webm";
+    const blob = new Blob(pendingChunks, { type: mimeType });
+    pendingChunks = [];
+
+    if (blob.size < 8000) return;
+
+    const ext = mimeType.includes("ogg") ? "ogg" : "webm";
+    const formData = new FormData();
+    formData.append("audio_chunk", blob, `live-${Date.now()}.${ext}`);
+    formData.append("speaker", "caller");
+    formData.append("sequence_number", String(liveSequenceNumber++));
+
+    const response = await fetch(`${API_BASE}/calls/${callId}/stream-chunk/`, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+    console.log("LIVE RESPONSE:", data);
+
+    if (response.status === 404) {
+        await stopLiveStreaming(true);
+        throw new Error(`Call ${callId} was not found. Live stream stopped.`);
+    }
+
+    if (!response.ok) {
+        throw new Error(data.error || JSON.stringify(data));
+    }
+
+    updateAnalysisUI(data, callId);
+    document.getElementById("callerInfo").innerText =
+        document.getElementById("callerName").value.trim() || `Call #${callId}`;
+
+    if (!data.chunk_text) {
+        setStatus("Live chunk uploaded, but no new transcript text was produced yet.", "error");
+    } else {
+        setStatus(`Live text received: ${data.chunk_text}`, "success");
+    }
+}
+
+    async function startLiveStreaming() {
+    const callId = document.getElementById("callId").value;
+
+    if (!callId) {
+        setStatus("Please create or load a call first.", "error");
+        return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus("Microphone access is not available here. Use localhost or HTTPS.", "error");
+        return;
+    }
+
+    try {
+        await stopLiveStreaming(true);
+
+        const startResponse = await fetch(`${API_BASE}/calls/${callId}/live/start/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        const startData = await startResponse.json();
+        if (!startResponse.ok) {
+            throw new Error(startData.error || JSON.stringify(startData));
+        }
+
+        liveCallId = String(callId);
+        liveSessionKey = startData.session_key;
+        liveSequenceNumber = 1;
+        pcmSendBuffer = [];
+        isStreaming = true;
+
+        liveStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                channelCount: 1
+            }
+        });
+
+        audioContext = new AudioContext();
+        await audioContext.audioWorklet.addModule("./audio-processor.js");
+
+        mediaStreamSource = audioContext.createMediaStreamSource(liveStream);
+        workletNode = new AudioWorkletNode(audioContext, "pcm-processor");
+
+        workletNode.port.onmessage = (event) => {
+            if (!isStreaming) return;
+
+            const inputData = event.data;
+            const downsampled = downsampleBuffer(inputData, audioContext.sampleRate, 16000);
+            const pcm16 = floatTo16BitPCM(downsampled);
+            pcmSendBuffer.push(pcm16);
+        };
+
+        mediaStreamSource.connect(workletNode);
+        workletNode.connect(audioContext.destination);
+
+        pcmFlushInterval = setInterval(async () => {
+            try {
+                if (!isStreaming || !liveCallId || !liveSessionKey) return;
+                await flushPCMBuffer();
+            } catch (error) {
+                console.error(error);
+                setStatus(`Live PCM upload failed.\n${error.message}`, "error");
+            }
+        }, 1500);
+
+        document.getElementById("callStatus").innerText = "live";
+        setStatus(`PCM live streaming started for Call ID ${liveCallId}.`, "success");
+    } catch (error) {
+        console.error(error);
+        setStatus(`Failed to start live streaming.\n${error.message}`, "error");
+    }
+}
+
+    async function stopLiveStreaming(silent = false) {
+        const activeCallId = liveCallId;
+        const activeSessionKey = liveSessionKey;
+
+        isStreaming = false;
+
+        if (pcmFlushInterval) {
+            clearInterval(pcmFlushInterval);
+            pcmFlushInterval = null;
+        }
+
+        try {
+            await flushPCMBuffer();
+        } catch (error) {
+            console.error("Final PCM flush failed:", error);
+        }
+
+        if (workletNode) {
+            try { workletNode.disconnect(); } catch (_) {}
+            workletNode = null;
+        }
+
+        if (mediaStreamSource) {
+            try { mediaStreamSource.disconnect(); } catch (_) {}
+            mediaStreamSource = null;
+        }
+
+        if (audioContext) {
+            try { await audioContext.close(); } catch (_) {}
+            audioContext = null;
+        }
+
+        if (liveStream) {
+            liveStream.getTracks().forEach(track => track.stop());
+            liveStream = null;
+        }
+
+        pcmSendBuffer = [];
+
+        if (activeCallId && activeSessionKey) {
+            try {
+                await fetch(`${API_BASE}/calls/${activeCallId}/live/stop/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+            } catch (error) {
+                console.error("Failed to stop live session on backend:", error);
+            }
+        }
+
+        liveCallId = null;
+        liveSessionKey = null;
+        liveSequenceNumber = 1;
+
+        if (!silent) {
+            document.getElementById("callStatus").innerText = "completed";
+            setStatus("PCM live streaming stopped.", "success");
+        }
+    }
+
+    loadCallHistory();
+</script>
